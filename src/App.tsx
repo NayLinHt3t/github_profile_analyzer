@@ -1,11 +1,21 @@
-import { fetchUser, fetchRepos } from "./lib/github";
-import { buildProfileData } from "./lib/transforms";
-
-const user = await fetchUser("naylinht3t");
-const repos = await fetchRepos("naylinht3t");
-const profile = buildProfileData(user, repos);
-console.log(profile);
-
+import { useGithubProfile } from "./hooks/useGithubProfile";
+import { ProfilePage } from "./pages/ProfilePage";
+import { ErrorMessage } from "./components/ErrorMessage";
+import { SearchPage } from "./pages/SearchPage";
 export default function App() {
-  return <div>hello</div>;
+  const { state, fetchProfile } = useGithubProfile();
+  return (
+    <div className="bg-gray-50 min-h-screen py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {state.status === "error" && <ErrorMessage message={state.message} />}
+        {state.status === "success" && <ProfilePage profileData={state.data} />}
+        {(state.status === "idle" || state.status === "loading") && (
+          <SearchPage
+            onSearch={fetchProfile}
+            isLoading={state.status === "loading"}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
